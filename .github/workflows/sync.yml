@@ -43,9 +43,15 @@ jobs:
         if: steps.tag.outputs.skip != 'true'
         run: git clone --depth 1 --branch "${{ steps.tag.outputs.tag }}" "https://github.com/$UPSTREAM_REPO.git" "$RUNNER_TEMP/upstream"
 
+      - name: Setup dotnet
+        if: steps.tag.outputs.skip != 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
       - name: Build package
         if: steps.tag.outputs.skip != 'true'
-        run: python3 "Tools~/build_package.py" "$RUNNER_TEMP/upstream" . "${{ steps.tag.outputs.tag }}"
+        run: python3 "Tools~/build_package.py" "$RUNNER_TEMP/upstream" .
 
       - name: Commit and tag
         if: steps.tag.outputs.skip != 'true'

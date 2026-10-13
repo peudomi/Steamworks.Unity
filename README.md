@@ -20,23 +20,21 @@ https://github.com/peudomi/Steamworks.Unity.git#2.5.2
 
 ## 구성
 
-- `Runtime/Source` — 업스트림 `Facepunch.Steamworks/` C# 소스 (어셈블리 `Facepunch.Steamworks`)
-- `Runtime/Plugins` — `steam_api` 네이티브 라이브러리 (Windows x64, macOS Universal, Linux x64)
+업스트림 Release zip의 `Release/Unity` 폴더와 같은 구성입니다. 소스 수정 없이 업스트림 csproj를 그대로 빌드합니다.
 
-업스트림 대비 변경점은 Unity 컴파일을 위한 자동 패치뿐입니다.
-
-- `Utility/Platform.cs` — `PLATFORM_*` define을 `UNITY_*` define으로 대체
-- C# 10 file-scoped namespace → 블록 namespace (Unity는 C# 9까지 지원)
+- `Runtime/Facepunch.Steamworks.{Win64,Win32,Posix}.dll` — 업스트림 csproj를 `net46` Release로 빌드한 결과 (+ pdb, xml)
+- `Runtime/redistributable_bin` — `steam_api` 네이티브 라이브러리
+- 플랫폼별 DLL 선택 등 모든 `.meta`는 업스트림 `UnityPlugin` 폴더의 것을 그대로 사용
 
 ## 업스트림 동기화
 
 GitHub Actions의 **Sync upstream** 워크플로가 매일 00:00 UTC(수동 실행도 가능)에 업스트림의 최신 Release 태그를 `package.json`의 `version`과 비교합니다. 버전이 다를 때만 패키지를 다시 생성해 `main`에 커밋하고 같은 이름의 태그를 붙입니다.
 
-로컬에서 직접 생성하려면:
+로컬에서 직접 생성하려면 (.NET SDK 필요):
 
 ```bash
 git clone --depth 1 --branch <tag> https://github.com/Facepunch/Facepunch.Steamworks.git upstream
-python3 "Tools~/build_package.py" upstream . <tag>
+python3 "Tools~/build_package.py" upstream .
 ```
 
 ## 라이선스
