@@ -30,7 +30,7 @@ https://github.com/peudomi/Steamworks.Unity.git#2.5.2
 
 ## 업스트림 동기화
 
-GitHub Actions의 **Sync upstream** 워크플로를 수동 실행하면 업스트림의 최신 Release 태그를 확인하고, 아직 반영되지 않은 버전이면 패키지를 다시 생성해 `main`에 커밋하고 같은 이름의 태그를 붙입니다.
+GitHub Actions의 **Sync upstream** 워크플로가 매일 00:00 UTC(수동 실행도 가능)에 업스트림의 최신 Release 태그를 `package.json`의 `version`과 비교합니다. 버전이 다를 때만 패키지를 다시 생성해 `main`에 커밋하고 같은 이름의 태그를 붙입니다.
 
 로컬에서 직접 생성하려면:
 

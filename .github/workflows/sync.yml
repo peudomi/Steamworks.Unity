@@ -3,17 +3,12 @@ name: Sync upstream
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: "업스트림 태그 (비우면 최신 Release)"
-        required: false
-        default: ""
       force:
-        description: "이미 반영된 태그여도 다시 생성"
+        description: "버전이 같아도 다시 생성"
         type: boolean
         default: false
-  # 매일 자동 실행이 필요하면 주석 해제
-  # schedule:
-  #   - cron: "0 0 * * *"
+  schedule:
+    - cron: "0 0 * * *"
 
 permissions:
   contents: write
@@ -29,21 +24,18 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Resolve upstream tag
+      - name: Compare versions
         id: tag
         env:
           GH_TOKEN: ${{ github.token }}
-          INPUT_TAG: ${{ inputs.tag }}
           FORCE: ${{ inputs.force }}
         run: |
-          tag="$INPUT_TAG"
-          if [ -z "$tag" ]; then
-            tag=$(gh api "repos/$UPSTREAM_REPO/releases/latest" --jq .tag_name)
-          fi
-          echo "upstream tag: $tag"
+          tag=$(gh api "repos/$UPSTREAM_REPO/releases/latest" --jq .tag_name)
+          current=$(jq -r .version package.json)
+          echo "upstream: $tag / package: $current"
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null && [ "$FORCE" != "true" ]; then
-            echo "이미 반영된 태그입니다."
+          if [ "$tag" = "$current" ] && [ "$FORCE" != "true" ]; then
+            echo "버전이 같아 건너뜁니다."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
