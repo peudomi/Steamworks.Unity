@@ -1,6 +1,6 @@
 {
   "name": "com.peudomi.steamworks",
-  "version": "0.0.0",
+  "version": "2.5.2",
   "displayName": "Steamworks",
   "description": "Object-oriented C# Steamworks API for Unity. Source package repackaged from Facepunch.Steamworks.",
   "unity": "2021.3",
