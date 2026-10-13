@@ -1,0 +1,73 @@
+name: Sync upstream
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "업스트림 태그 (비우면 최신 Release)"
+        required: false
+        default: ""
+      force:
+        description: "이미 반영된 태그여도 다시 생성"
+        type: boolean
+        default: false
+  # 매일 자동 실행이 필요하면 주석 해제
+  # schedule:
+  #   - cron: "0 0 * * *"
+
+permissions:
+  contents: write
+
+env:
+  UPSTREAM_REPO: Facepunch/Facepunch.Steamworks
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve upstream tag
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.tag }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          tag="$INPUT_TAG"
+          if [ -z "$tag" ]; then
+            tag=$(gh api "repos/$UPSTREAM_REPO/releases/latest" --jq .tag_name)
+          fi
+          echo "upstream tag: $tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null && [ "$FORCE" != "true" ]; then
+            echo "이미 반영된 태그입니다."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout upstream
+        if: steps.tag.outputs.skip != 'true'
+        run: git clone --depth 1 --branch "${{ steps.tag.outputs.tag }}" "https://github.com/$UPSTREAM_REPO.git" "$RUNNER_TEMP/upstream"
+
+      - name: Build package
+        if: steps.tag.outputs.skip != 'true'
+        run: python3 "Tools~/build_package.py" "$RUNNER_TEMP/upstream" . "${{ steps.tag.outputs.tag }}"
+
+      - name: Commit and tag
+        if: steps.tag.outputs.skip != 'true'
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "변경 사항 없음"
+          else
+            git commit -m "Sync upstream $TAG"
+          fi
+          git tag -f "$TAG"
+          git push origin HEAD:main
+          git push -f origin "refs/tags/$TAG"

@@ -1,0 +1,20 @@
+{
+  "name": "com.peudomi.steamworks",
+  "version": "0.0.0",
+  "displayName": "Steamworks",
+  "description": "Object-oriented C# Steamworks API for Unity. Source package repackaged from Facepunch.Steamworks.",
+  "unity": "2021.3",
+  "license": "MIT",
+  "author": {
+    "name": "peudomi",
+    "url": "https://github.com/peudomi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/peudomi/Steamworks.Unity.git"
+  },
+  "keywords": [
+    "steam",
+    "steamworks"
+  ]
+}
